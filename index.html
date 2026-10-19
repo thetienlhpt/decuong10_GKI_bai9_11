@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phiếu Học Tập Tương Tác - Bài 9 & 11</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /* Nền màu vũ trụ/huyền bí (Deep space/midnight) */
+            background: linear-gradient(135deg, #09090b 0%, #1e1b4b 50%, #0f172a 100%);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            color: #f8fafc;
+        }
+        
+        /* Chữ chìm bản quyền tương thích điện thoại */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 3.5rem; /* Kích thước nhỏ cho điện thoại */
+            color: rgba(255, 255, 255, 0.03); /* Chữ chìm màu trắng rất nhạt */
+            font-weight: 800;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 0;
+            user-select: none;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        @media (min-width: 768px) {
+            .watermark {
+                font-size: 5.5rem; /* Kích thước to cho máy tính/tablet */
+            }
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 1.25rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 1px solid rgba(212, 175, 55, 0.15); /* Viền vàng đồng ánh kim rất nhẹ */
+            position: relative;
+            z-index: 10;
+        }
+
+        .option-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 41, 59, 0.6);
+            color: #e2e8f0;
+        }
+        
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: rgba(212, 175, 55, 0.6);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .option-correct {
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #34d399 !important; /* Xanh ngọc lục bảo */
+            border-color: #10b981 !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3) !important;
+        }
+
+        .option-wrong {
+            background: rgba(244, 63, 94, 0.15) !important;
+            color: #fb7185 !important; /* Đỏ hoa hồng */
+            border-color: #f43f5e !important;
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.3) !important;
+        }
+
+        .tf-btn {
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(15, 23, 42, 0.8);
+            color: #cbd5e1;
+        }
+        .tf-btn:not(:disabled):hover {
+            border-color: #d4af37;
+            color: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+        
+        /* Hiệu ứng nền chìm huyền bí cho các câu hỏi */
+        .bg-card-0 { background: linear-gradient(145deg, rgba(30, 58, 138, 0.3), rgba(15, 23, 42, 0.7)); } /* Xanh biển sâu */
+        .bg-card-1 { background: linear-gradient(145deg, rgba(88, 28, 135, 0.3), rgba(15, 23, 42, 0.7)); } /* Tím cẩm chướng */
+        .bg-card-2 { background: linear-gradient(145deg, rgba(15, 118, 110, 0.3), rgba(15, 23, 42, 0.7)); } /* Xanh cổ vịt */
+
+        .app-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            font-weight: 700;
+            color: #d4af37; /* Màu vàng Gold */
+            position: relative;
+            z-index: 20;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        @media (min-width: 768px) {
+            .app-header {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 1.25rem 2rem;
+            }
+        }
+
+        #next-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #334155;
+            color: #94a3b8;
+            box-shadow: none;
+            transform: none;
+            border-color: transparent;
+        }
+
+        /* Tùy chỉnh thanh cuộn cho giao diện tối */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.4); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.7); }
+    </style>
+</head>
+<body>
+
+    <div class="watermark">
+        GV. Nguyễn Tiên &nbsp;&nbsp; GV. Nguyễn Tiên &nbsp;&nbsp; GV. Nguyễn Tiên <br> 
+        GV. Nguyễn Tiên &nbsp;&nbsp; GV. Nguyễn Tiên &nbsp;&nbsp; GV. Nguyễn Tiên <br>
+        GV. Nguyễn Tiên &nbsp;&nbsp; GV. Nguyễn Tiên &nbsp;&nbsp; GV. Nguyễn Tiên
+    </div>
+
+    <header class="app-header border-b border-white/5 bg-slate-900/40 backdrop-blur-md">
+        <div class="uppercase tracking-wider text-slate-300 md:flex-1 text-left w-full md:w-auto text-center md:text-left text-sm md:text-base">Tin học 10</div>
+        <div class="uppercase tracking-wider text-center text-sm md:text-base">Trường THPT Long Hải - Phước Tỉnh</div>
+        <div class="md:flex-1 text-right w-full md:w-auto text-center md:text-right text-2xl md:text-3xl text-pink-400 drop-shadow-[0_0_8px_rgba(244,114,182,0.6)]" style="font-family: 'Dancing Script', cursive; text-transform: none; letter-spacing: normal;">GV. Nguyễn Tiên</div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-3 md:p-6 relative z-10">
+        
+        <!-- Màn hình Đăng nhập -->
+        <div id="login-screen" class="glass-panel w-full max-w-md p-6 md:p-10 text-center">
+            <div class="mb-6 md:mb-8">
+                <div class="inline-block p-3 rounded-2xl bg-gradient-to-br from-amber-200/10 to-amber-500/10 mb-4 border border-amber-500/20 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 md:h-10 md:w-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-2 uppercase tracking-widest drop-shadow-lg">Phiếu Học Tập</h1>
+                <p class="text-xs md:text-sm text-slate-400 font-medium uppercase tracking-wider">Đề Cương Ôn Tập Bài 9 và 11</p>
+            </div>
+            
+            <p id="login-attempt-info" class="text-xs md:text-sm font-semibold text-emerald-400 mb-4 md:mb-5 h-5 transition-all drop-shadow-md"></p>
+
+            <div class="mb-4 md:mb-5 text-left">
+                <label class="block text-xs md:text-sm font-semibold mb-2 text-slate-300" for="studentName">Họ và tên học sinh:</label>
+                <input type="text" id="studentName" class="w-full p-3 md:p-3.5 border border-slate-600/50 rounded-xl focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all bg-slate-800/80 text-white placeholder-slate-500 shadow-inner text-sm md:text-base" placeholder="Nhập họ và tên của bạn...">
+            </div>
+            
+            <div class="mb-6 md:mb-8 text-left">
+                <label class="block text-xs md:text-sm font-semibold mb-2 text-slate-300" for="studentClass">Lớp:</label>
+                <input type="text" id="studentClass" class="w-full p-3 md:p-3.5 border border-slate-600/50 rounded-xl focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-400/20 transition-all bg-slate-800/80 text-white placeholder-slate-500 shadow-inner text-sm md:text-base" placeholder="VD: 10A1...">
+            </div>
+            
+            <button onclick="startQuiz()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-900 font-extrabold py-3.5 md:py-4 px-4 rounded-xl transition duration-300 shadow-[0_0_20px_rgba(212,175,55,0.4)] transform hover:-translate-y-1 uppercase tracking-wider text-sm md:text-base">
+                Bắt Đầu Làm Bài
+            </button>
+            <p id="login-error" class="text-rose-400 text-xs md:text-sm mt-4 hidden font-semibold bg-rose-900/30 border border-rose-500/30 py-2 rounded-lg">Vui lòng nhập đầy đủ Họ tên và Lớp!</p>
+        </div>
+
+        <!-- Màn hình Câu hỏi -->
+        <div id="quiz-screen" class="glass-panel w-full max-w-4xl p-4 md:p-8 hidden flex flex-col h-full max-h-[88vh]">
+            
+            <!-- Tiêu đề xuyên suốt -->
+            <h2 class="text-lg md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 text-center mb-4 uppercase tracking-widest drop-shadow-md">Đề Cương Ôn Tập Bài 9 và 11</h2>
+
+            <!-- Thống kê -->
+            <div class="flex flex-wrap justify-between items-center mb-4 md:mb-5 text-xs md:text-base font-bold bg-slate-800/60 p-3 md:p-4 rounded-xl shadow-inner border border-slate-600/30 gap-2 md:gap-3 backdrop-blur-sm">
+                <div class="flex items-center gap-2 md:gap-4">
+                    <span class="text-amber-400 bg-amber-400/10 px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-amber-400/20 shadow-sm">Câu: <span id="stat-completed" class="text-sm md:text-lg">0/26</span></span>
+                    <span class="text-emerald-400 drop-shadow-sm">Đúng: <span id="stat-correct" class="text-sm md:text-lg">0</span></span>
+                    <span class="text-rose-400 drop-shadow-sm">Sai: <span id="stat-wrong" class="text-sm md:text-lg">0</span></span>
+                </div>
+                <div class="flex items-center gap-2 md:gap-3 ml-auto">
+                    <span class="text-indigo-300 bg-indigo-500/10 px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-indigo-500/20 shadow-sm">Lượt: <span id="stat-attempt" class="text-base md:text-xl font-black">0</span></span>
+                </div>
+            </div>
+
+            <!-- Khung chứa nội dung câu hỏi -->
+            <div id="question-card" class="flex-grow p-4 md:p-8 rounded-2xl shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)] mb-4 md:mb-5 overflow-y-auto border border-white/5 transition-all duration-700">
+                <div id="section-title" class="text-xs md:text-sm font-extrabold text-amber-500 mb-2 md:mb-3 uppercase tracking-widest drop-shadow-sm"></div>
+                <h2 id="question-text" class="text-sm md:text-lg font-bold text-slate-100 mb-4 md:mb-6 leading-relaxed text-shadow-sm">Đang tải câu hỏi...</h2>
+                
+                <!-- Vùng chứa đáp án trắc nghiệm nhiều lựa chọn -->
+                <div id="options-container" class="space-y-2 md:space-y-3 hidden"></div>
+
+                <!-- Vùng chứa đáp án trắc nghiệm đúng sai -->
+                <div id="tf-container" class="space-y-3 md:space-y-4 hidden"></div>
+
+                <!-- Vùng chứa lời giải thích chung cho MCQ (chữ nhỏ gọn text-xs trên mobile) -->
+                <div id="mcq-explanation" class="mt-4 md:mt-5 hidden text-xs md:text-sm text-amber-200 bg-amber-900/30 p-3 md:p-4 rounded-xl border border-amber-500/30 font-medium shadow-inner leading-relaxed"></div>
+            </div>
+
+            <!-- Điều hướng -->
+            <div class="mt-auto pt-2">
+                <button id="next-btn" onclick="nextQuestion()" disabled class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold py-3.5 md:py-4 px-4 rounded-xl text-sm md:text-lg transition duration-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] border border-cyan-400/30 uppercase tracking-widest">
+                    Câu Tiếp Theo
+                </button>
+            </div>
+        </div>
+
+        <!-- Màn hình Kết quả -->
+        <div id="result-screen" class="glass-panel w-full max-w-lg p-6 md:p-10 text-center hidden">
+            <div class="mb-4 md:mb-6 flex justify-center">
+                <div class="p-3 md:p-4 rounded-full bg-emerald-500/20 border border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 md:h-12 md:w-12 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black mb-2 md:mb-3 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 uppercase tracking-widest drop-shadow-lg">Hoàn thành bài tập!</h1>
+            <p id="student-info-display" class="text-sm md:text-base text-slate-300 mb-6 md:mb-8 font-semibold bg-slate-800/60 py-2 md:py-3 rounded-xl border border-slate-600/50 shadow-inner"></p>
+            
+            <div class="bg-slate-900/60 p-6 md:p-8 rounded-2xl shadow-[inset_0_2px_15px_rgba(0,0,0,0.5)] border border-amber-500/20 mb-6 md:mb-8 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent pointer-events-none"></div>
+                <div class="text-5xl md:text-7xl font-black mb-2 md:mb-3 text-transparent bg-clip-text bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-500 drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]" id="final-score-text">0/44</div>
+                <p class="text-slate-400 font-bold uppercase tracking-widest text-xs md:text-sm">Tổng Số Ý Chọn Đúng</p>
+                <p class="text-[10px] md:text-xs text-slate-500 mt-1 md:mt-2 font-medium">(20 ý Trắc nghiệm + 24 ý Đúng/Sai)</p>
+            </div>
+
+            <p id="feedback-message" class="text-lg md:text-xl font-bold mb-4 md:mb-6 px-2 drop-shadow-md"></p>
+            
+            <div class="bg-indigo-900/40 border border-indigo-500/30 text-indigo-300 py-2 md:py-3 px-4 md:px-6 rounded-xl mb-6 md:mb-8 inline-block shadow-sm">
+                <p id="final-attempt-counter" class="text-sm md:text-base font-bold"></p>
+            </div>
+
+            <button onclick="restartQuiz()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold py-3.5 md:py-4 px-4 rounded-xl transition duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)] border border-emerald-400/30 mb-3 md:mb-4 text-sm md:text-lg uppercase tracking-wider">
+                Làm Lại Bài
+            </button>
+            <p class="text-[10px] md:text-xs text-slate-500 mt-2 md:mt-3 font-medium">Dữ liệu bài làm đã được đồng bộ an toàn lên hệ thống.</p>
+        </div>
+
+    </main>
+
+    <script>
+        const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxP1LYMZNS2sumbmi3rk_v08TCNBm3TUQy2L0s94NwB5oO2yVeX15HJ1Dvec_oBR5HPvA/exec"; 
+
+        const rawMCQs = [
+            // BÀI 9
+            { question: "Dấu hiệu nào cho thấy người dùng có nguy cơ bị lộ lọt dữ liệu và thông tin cá nhân?", options: ["Xuất hiện liên tục các cuộc gọi và tin nhắn lạ chào mời.", "Thiết bị tự động kết nối thành công với mạng Wi-Fi tại nhà.", "Mức dung lượng pin của thiết bị duy trì lâu hơn mức bình thường.", "Quá trình tải các tài liệu học tập diễn ra ổn định và nhanh chóng."], answer: 0, explanation: "Khi thông tin cá nhân (SĐT, tên tuổi) bị lộ, các đối tượng quảng cáo hoặc lừa đảo sẽ liên tục gọi điện và nhắn tin rác đến số của bạn." },
+            { question: "Khi sử dụng mạng máy tính công cộng, hành vi nào sau đây được xem là an toàn?", options: ["Tiến hành chuyển tiền ngân hàng mà không sử dụng mạng riêng ảo.", "Lưu thông tin đăng nhập tài khoản trên các trình duyệt công cộng.", "Tắt tính năng chia sẻ tệp và tránh truy cập website thiếu mã hóa.", "Đăng tải toàn bộ giấy tờ tùy thân cá nhân lên các diễn đàn mở."], answer: 2, explanation: "Tắt tính năng chia sẻ tệp giúp máy tính không bị truy cập trái phép. Tránh website thiếu mã hóa giúp bảo vệ gói tin không bị hacker chặn bắt trên mạng công cộng." },
+            { question: "Cách tạo và sử dụng mật khẩu nào sau đây an toàn hơn?", options: ["Dùng mật khẩu dài, khó đoán, không chứa thông tin cá nhân và riêng biệt cho từng tài khoản.", "Đặt theo số căn cước công dân hoặc ngày tháng năm sinh của cá nhân hoặc của người thân trong gia đình.", "Chọn dãy số tự nhiên liên tiếp từ một đến tám cho tiện nhớ.", "Sử dụng tên riêng của bản thân ghép cùng tên trường học."], answer: 0, explanation: "Mật khẩu an toàn cần đủ độ dài, phức tạp, không chứa các thông tin dễ đoán (ngày sinh, số CCCD) và không dùng chung một mật khẩu cho nhiều dịch vụ." },
+            { question: "Tính năng xác thực hai yếu tố (2FA) mang lại lợi ích chủ yếu nào cho người sử dụng?", options: ["Tăng dung lượng lưu trữ tài nguyên trên dịch vụ đám mây.", "Tăng cường bảo vệ tài khoản bằng một yếu tố xác thực khác ngoài mật khẩu.", "Đẩy nhanh tốc độ truy cập mạng Internet khi lướt web học tập.", "Cho phép nhiều người cùng truy cập một tài khoản trực tuyến."], answer: 1, explanation: "2FA (Two-Factor Authentication) cung cấp thêm một lớp bảo mật (ví dụ: mã OTP gửi về điện thoại) bên cạnh mật khẩu truyền thống." },
+            { question: "Mục đích cơ bản của hành động che chắn bàn phím khi nhập mật mã tại các cây ATM là gì?", options: ["Giúp cho bề mặt phím bấm luôn được sạch sẽ và không dính vết bẩn.", "Phòng tránh các thiết bị quay lén ghi lại thao tác bấm mã bí mật.", "Giúp cho nút bấm nhận diện chính xác và tránh bị lỗi đường truyền.", "Tạo sự kín đáo và thể hiện phép lịch sự với những người đứng sau."], answer: 1, explanation: "Che bàn phím giúp bảo vệ mã PIN khỏi bị kẻ xấu nhìn lén hoặc camera ngụy trang quay lại nhằm mục đích trộm tiền." },
+            { question: "Loại mã độc nào ngụy trang dưới dạng phần mềm hữu ích để lừa người dùng cài đặt?", options: ["Phần mềm mã độc ngựa thành Troy (Trojan).", "Phần mềm tống tiền mã hóa dữ liệu (Ransomware).", "Mã độc tự nhân bản qua đường mạng (Worm).", "Các thư điện tử quảng cáo rác (Spam Mail)."], answer: 0, explanation: "Trojan (Ngựa gỗ) thường ẩn mình trong các phần mềm tiện ích, bản crack hoặc trò chơi để lừa người dùng tải về và khởi chạy." },
+            { question: "Phần mềm tống tiền (Ransomware) gây hại chủ yếu cho hệ thống bằng phương thức nào?", options: ["Làm cháy hỏng các linh kiện vi mạch phần cứng trong thùng máy tính.", "Gửi các thư điện tử khen ngợi liên tục tới tất cả bạn bè trong danh bạ.", "Tự động điều chỉnh độ sáng màn hình hiển thị lên mức cao nhất.", "Tự ý mã hóa dữ liệu quan trọng rồi yêu cầu tiền chuộc để giải mã."], answer: 3, explanation: "Ransomware mã hóa dữ liệu trên máy nạn nhân, khiến họ không thể mở được tệp và hiển thị thông báo đòi tiền chuộc để lấy khóa giải mã." },
+            { question: "Phần mềm gián điệp (Spyware) thường thực hiện hành vi nguy hại nào trên máy tính?", options: ["Nâng cấp dung lượng bộ nhớ tạm thời cho toàn bộ hệ thống máy tính.", "Hỗ trợ hệ thống tải xuống các bản vá lỗi bảo mật định kỳ nhanh hơn.", "Lén lút theo dõi bàn phím, chụp ảnh màn hình và đánh cắp thông tin.", "Tự động sửa chữa các tệp tin hệ điều hành bị hỏng hóc hoặc thiếu sót."], answer: 2, explanation: "Spyware hoạt động lén lút (ngầm) để thu thập thông tin cá nhân, lịch sử duyệt web và thao tác bàn phím gửi cho tin tặc." },
+            { question: "Thao tác an toàn nhất khi tải một tệp thực thi (.exe) từ trên mạng Internet về máy là gì?", options: ["Kích đúp chuột mở trực tiếp tệp tin ngay sau khi vừa tải xuống xong.", "Quét tệp bằng phần mềm diệt virus cập nhật trước khi chạy cài đặt.", "Tắt toàn bộ tường lửa và hệ thống bảo vệ máy tính để cài đặt thuận lợi.", "Sửa đổi phần mở rộng tệp tin sang dạng văn bản để xem nội dung mã."], answer: 1, explanation: "Tệp .exe là tệp cài đặt chương trình, rất dễ chứa mã độc. Luôn phải quét bằng phần mềm diệt virus trước khi mở." },
+            { question: "Mục đích cốt lõi của việc cập nhật cơ sở dữ liệu mẫu virus định kỳ cho phần mềm là gì?", options: ["Giúp giải phóng bớt dung lượng bộ nhớ còn trống trên ổ đĩa cứng.", "Đồng bộ toàn bộ các tài khoản mạng xã hội của người dùng lên máy chủ.", "Hạn chế mức tiêu hao dung lượng đường truyền dữ liệu mạng hàng tháng.", "Nhận diện và ngăn chặn kịp thời các biến thể mã độc mới xuất hiện."], answer: 3, explanation: "Tin tặc liên tục tạo ra virus mới. Phần mềm diệt virus cần cập nhật kho dữ liệu (signature) thường xuyên để có thể nhận diện chúng." },
+            
+            // BÀI 11
+            { question: "Hành vi nào sau đây thể hiện văn hóa ứng xử đúng đắn trên mạng xã hội?", options: ["Dùng lời lẽ thô tục để chỉ trích ý kiến trái chiều.", "Tôn trọng quan điểm khác biệt và giao tiếp lịch sự.", "Chia sẻ hình ảnh nhạy cảm của bạn bè khi chưa hỏi.", "Hùa theo đám đông để lăng nhục một tài khoản cá nhân."], answer: 1, explanation: "Mạng xã hội cũng như đời thực, cần tuân thủ các quy tắc chuẩn mực: giao tiếp văn minh, tôn trọng sự khác biệt của người khác." },
+            { question: "Trong nhóm học tập trên mạng, Minh đưa ra một ý kiến chưa chính xác. Một số bạn bình luận chế giễu khiến Minh không muốn tiếp tục trao đổi. Nếu là thành viên của nhóm, em nên làm gì?", options: ["Đề nghị Minh xóa ý kiến để tránh ảnh hưởng đến nhóm.", "Góp ý bằng dẫn chứng và đề nghị các bạn dừng chế giễu Minh.", "Chuyển cuộc trao đổi sang nhóm khác và không mời Minh tham gia.", "Chụp lại các bình luận rồi đăng lên trang cá nhân để bênh vực Minh."], answer: 1, explanation: "Nên sử dụng lập luận, minh chứng để giải thích một cách lịch sự, đồng thời bảo vệ bạn khỏi sự bắt nạt trên mạng." },
+            { question: "Nhóm của An muốn dùng một bức ảnh trên mạng để làm áp phích cho hoạt động của lớp. Tác giả ghi rõ: “Được sử dụng cho mục đích phi thương mại, phải ghi tên tác giả và không chỉnh sửa ảnh”. Nhóm cần thêm thông điệp vào áp phích. Cách làm nào phù hợp với điều kiện sử dụng?", options: ["Giữ nguyên ảnh, ghi tên tác giả và đặt thông điệp ở phần riêng bên ngoài ảnh.", "Cắt ảnh cho vừa bố cục, ghi tên tác giả và đặt thông điệp bên dưới ảnh.", "Giữ nguyên ảnh, đặt thông điệp bên ngoài và chỉ ghi nguồn là “Internet”.", "Chèn thông điệp trực tiếp lên ảnh và ghi đầy đủ tên tác giả ở cuối áp phích."], answer: 0, explanation: "Yêu cầu 'Không chỉnh sửa' (No Derivative) bắt buộc phải giữ nguyên vẹn bức ảnh. Không được chèn chữ trực tiếp lên ảnh hay cắt xén ảnh." },
+            { question: "Một người tự ý sửa chữa, cắt xén tác phẩm của người khác, làm sai lệch nội dung và gây phương hại đến danh dự, uy tín của tác giả. Hành vi này trực tiếp xâm phạm quyền nào sau đây?", options: ["Quy chuẩn định dạng văn bản hành chính của cơ quan.", "Tiêu chuẩn kĩ thuật in ấn xuất bản phẩm quốc gia.", "Quyền bảo vệ sự toàn vẹn tác phẩm của tác giả gốc.", "Quy định về việc sử dụng phông chữ hiển thị văn bản."], answer: 2, explanation: "Quyền bảo vệ sự toàn vẹn tác phẩm là quyền nhân thân thiêng liêng, cấm người khác cắt xén, xuyên tạc tác phẩm dưới mọi hình thức." },
+            { question: "Khi mua một phần mềm có bản quyền (như Microsoft Office), người mua thực chất nhận được quyền gì?", options: ["Quyền sử dụng phần mềm theo điều khoản của nhà sản xuất.", "Quyền sở hữu toàn bộ mã nguồn ban đầu của phần mềm.", "Quyền tự do bán lại phần mềm cho các công ty khác dùng.", "Quyền thay đổi tên phần mềm thành tên của chính mình."], answer: 0, explanation: "Mua phần mềm là mua 'Giấy phép sử dụng' (License). Bạn chỉ có quyền dùng theo thỏa thuận, không phải là chủ sở hữu mã nguồn của phần mềm." },
+            { question: "Tại sao việc sử dụng phần mềm bẻ khóa (crack) lại tiềm ẩn nhiều nguy cơ mất an toàn?", options: ["Làm giảm tốc độ hiển thị hình ảnh của màn hình máy tính.", "Bản crack thường bị kẻ xấu cài cắm thêm các loại mã độc.", "Khiến máy tính không thể kết nối được với chuột có dây.", "Tự động xóa bỏ toàn bộ hệ điều hành Windows sau vài giờ."], answer: 1, explanation: "Để crack phần mềm, bạn phải tải tệp bẻ khóa từ nguồn không chính thống. Các tệp này thường chứa Trojan, Spyware ẩn nấp bên trong." },
+            { question: "Một bức ảnh phong cảnh do em tự chụp và đăng lên mạng thuộc quyền sở hữu của ai?", options: ["Thuộc sở hữu của công ty sản xuất chiếc điện thoại chụp.", "Thuộc sở hữu chung của toàn bộ người dùng mạng xã hội.", "Thuộc quyền quản lí tuyệt đối của nhà cung cấp dịch vụ mạng.", "Thuộc quyền tác giả của chính em kể từ khi chụp bức ảnh đó."], answer: 3, explanation: "Quyền tác giả phát sinh ngay khi tác phẩm được sáng tạo ra. Bạn là người chụp nên bạn sở hữu bản quyền bức ảnh đó." },
+            { question: "Khi phát hiện ai đó sử dụng tài khoản mạng mạo danh mình, em nên làm việc gì đầu tiên?", options: ["Nhắn tin chửi bới kẻ mạo danh trên tất cả các diễn đàn.", "Báo cáo tài khoản giả mạo cho quản trị viên nền tảng mạng.", "Xóa tài khoản thật của mình để kẻ xấu không làm phiền nữa.", "Nhờ người thân chuyển tiền cho kẻ mạo danh để xin lại nick."], answer: 1, explanation: "Hãy dùng tính năng Báo cáo (Report) của nền tảng MXH và cung cấp thông tin để quản trị viên khóa tài khoản giả mạo." },
+            { question: "Một người tự ý sao chép và đăng toàn bộ một bộ phim có bản quyền lên trang cá nhân cho mọi người xem miễn phí khi chưa được chủ sở hữu quyền tác giả cho phép. Hành vi này là gì?", options: ["Đóng góp tích cực cho phong trào phổ biến văn hóa đại chúng.", "Hành vi hợp pháp vì không thu tiền vé của người theo dõi mạng.", "Giúp đoàn làm phim quảng bá sản phẩm điện ảnh rộng rãi hơn.", "Xâm phạm quyền tác giả đối với bộ phim."], answer: 3, explanation: "Dù không thu lợi nhuận (không bán vé), việc tự ý phát tán tác phẩm có bản quyền vẫn là hành vi vi phạm Luật Sở hữu trí tuệ." },
+            { question: "Hành vi lan truyền video clip bạo lực học đường để câu lượt xem, chế giễu nạn nhân lên môi trường mạng dẫn đến điều gì?", options: ["Giúp giảm thiểu triệt để tình trạng học sinh xô xát trong nhà trường.", "Được pháp luật khuyến khích nhằm tăng cường nhận thức pháp lí học đường.", "Không gây ảnh hưởng xấu gì vì đó là những hình ảnh phản ánh thực tế.", "Tiếp tay cho bạo lực học đường và gây tổn thương nặng nề cho nạn nhân."], answer: 3, explanation: "Chia sẻ video bạo lực là gián tiếp tiếp tay cho bạo lực mạng, gây ảnh hưởng danh dự và tâm lý vô cùng nặng nề cho học sinh bị hại." }
+        ];
+
+        const rawTFs = [
+            // BÀI 9
+            { context: "Câu 1. Minh sử dụng nhiều tài khoản trực tuyến (Facebook, Zalo, Gmail và hệ thống học tập). Để tiện ghi nhớ, Minh dùng chung ngày sinh 15082008 làm mật khẩu cho mọi nền tảng.", subs: [
+                { text: "a) Mật khẩu tạo từ ngày sinh cá nhân thuộc nhóm yếu và rất dễ bị tin tặc bẻ khóa bằng công cụ tự động.", ans: true, explanation: "Tin tặc thường dùng từ điển ngày tháng năm sinh để bẻ khóa tự động rất nhanh." },
+                { text: "b) Đặt duy nhất một mật khẩu cho mọi dịch vụ giúp nâng cao năng lực an toàn thông tin của người dùng.", ans: false, explanation: "Rất nguy hiểm! Nếu lộ một mật khẩu, tin tặc sẽ chiếm được toàn bộ các tài khoản của bạn." },
+                { text: "c) Minh nên sử dụng mật khẩu dài, khó đoán và riêng biệt cho từng tài khoản.", ans: true, explanation: "Mật khẩu mạnh phải dài, có chữ, số, kí tự đặc biệt và không dùng chung." },
+                { text: "d) Việc bật tính năng xác thực hai yếu tố là không cần thiết vì chỉ làm kéo dài thời gian đăng nhập.", ans: false, explanation: "Xác thực 2 yếu tố (2FA) là lớp bảo mật cực kỳ quan trọng giúp bảo vệ tài khoản ngay cả khi lộ mật khẩu." }
+            ]},
+            { context: "Câu 2. Tuấn tìm kiếm bản bẻ khóa (crack) của một phần mềm đồ họa đắt tiền từ trang web lạ. Tệp tải về đi kèm hướng dẫn yêu cầu tắt hoàn toàn các phần mềm diệt virus trước khi cài đặt.", subs: [
+                { text: "a) Ngựa gỗ Trojan thường ngụy trang bên trong các bản phần mềm lậu để đánh lừa người dùng tải về.", ans: true, explanation: "Các phần mềm crack thường là vỏ bọc để dụ người dùng tự tay đưa Trojan vào máy." },
+                { text: "b) Yêu cầu vô hiệu hóa công cụ diệt virus là thao tác an toàn chứng minh phần mềm không có mã độc hại.", ans: false, explanation: "Đây là chiêu trò để mã độc không bị phần mềm diệt virus phát hiện và tiêu diệt." },
+                { text: "c) Hành động tắt phần mềm bảo vệ sẽ mở đường cho tin tặc xâm nhập và kiểm soát toàn bộ máy tính.", ans: true, explanation: "Khi tắt khiên bảo vệ, máy tính hoàn toàn không có khả năng chống cự sự lây nhiễm." },
+                { text: "d) Tuấn nên xóa tệp lạ và chọn giải pháp ứng dụng nguồn mở miễn phí hợp pháp để phục vụ công việc.", ans: true, explanation: "Nên sử dụng các phần mềm mã nguồn mở miễn phí (như GIMP thay cho Photoshop) để đảm bảo an toàn và tuân thủ bản quyền." }
+            ]},
+            { context: "Câu 3. Tại quán cà phê, Hoa kết nối máy tính vào mạng Wi-Fi mở không mật khẩu mang tên Free_Coffee_HighSpeed để thực hiện thanh toán hóa đơn mua sắm trực tuyến bằng thẻ tín dụng.", subs: [
+                { text: "a) Mạng không dây công cộng tiềm ẩn rủi ro bị kẻ xấu chặn bắt gói tin và đánh cắp thông tin thẻ cá nhân.", ans: true, explanation: "Mạng công cộng không mã hóa giúp tin tặc dễ dàng dùng công cụ 'nghe lén' (sniffer) trên mạng." },
+                { text: "b) Giao thức bảo mật có biểu tượng ổ khóa giúp mã hóa các thông tin trao đổi an toàn hơn chuẩn cơ bản.", ans: true, explanation: "HTTPS (biểu tượng ổ khóa) mã hóa dữ liệu giữa trình duyệt và máy chủ." },
+                { text: "c) Người dùng có thể an tâm tuyệt đối khi nhập mã bảo mật thẻ thanh toán trên mọi điểm Wi-Fi miễn phí.", ans: false, explanation: "Không bao giờ thực hiện các giao dịch nhạy cảm trên hệ thống Wi-Fi không có mật khẩu." },
+                { text: "d) Hoa nên chuyển đổi sang kết nối dữ liệu mạng di động cá nhân để thực hiện giao dịch tài chính an toàn.", ans: true, explanation: "Sử dụng mạng 4G/5G cá nhân sẽ an toàn và bảo mật hơn rất nhiều so với mạng Wi-Fi lạ." }
+            ]},
+            
+            // BÀI 11
+            { context: "Câu 1. An mua giấy phép sử dụng một phần mềm học tập. Giấy phép quy định chỉ được cài đặt và sử dụng trên một máy tính. An đã cài phần mềm trên máy của mình; bạn cùng lớp đề nghị An chia sẻ mã kích hoạt để cài thêm trên máy khác. Hãy xác định mỗi nhận định sau là đúng hay sai:", subs: [
+                { text: "a) Giấy phép sử dụng phần mềm quy định phạm vi và điều kiện người dùng được phép sử dụng phần mềm.", ans: true, explanation: "Giấy phép (License) là thỏa thuận hợp đồng quy định rõ những gì bạn được làm với phần mềm." },
+                { text: "b) Mua quyền sử dụng phần mềm đồng nghĩa với việc trở thành chủ sở hữu quyền tác giả của phần mềm đó.", ans: false, explanation: "Bạn chỉ sở hữu quyền ĐƯỢC DÙNG (License), tác giả vẫn nắm quyền sở hữu phần mềm đó." },
+                { text: "c) Cài thêm phần mềm trên máy của bạn bằng cùng giấy phép sẽ vượt quá phạm vi sử dụng được cho phép trong tình huống này.", ans: true, explanation: "Phần mềm quy định rõ 'chỉ được cài trên MỘT máy', việc cài máy thứ 2 là vi phạm hợp đồng." },
+                { text: "d) An nên chia sẻ mã kích hoạt cho bạn, với điều kiện bạn chỉ dùng phần mềm để học tập.", ans: false, explanation: "Việc chia sẻ này vi phạm điều khoản bản quyền, dù dùng với bất kì mục đích gì đi chăng nữa." }
+            ]},
+            { context: "Câu 2. Huy phát hiện một tài khoản dùng tên và ảnh của mình để nhắn tin hỏi vay tiền bạn bè. Huy chưa biết ai tạo tài khoản đó và muốn ngăn các bạn bị lừa. Hãy xác định mỗi nhận định sau là đúng hay sai:", subs: [
+                { text: "a) Mạo danh người khác để lừa người dùng là hành vi không phù hợp trong môi trường số.", ans: true, explanation: "Đây là hành vi lừa đảo chiếm đoạt tài sản vi phạm nghiêm trọng pháp luật." },
+                { text: "b) Người dùng có thể sử dụng chức năng báo cáo của nền tảng khi phát hiện tài khoản giả mạo.", ans: true, explanation: "Nền tảng MXH (Facebook, Zalo) luôn cung cấp nút Report (Báo cáo) để xử lý giả mạo." },
+                { text: "c) Tài khoản giả mạo có thể khiến bạn bè nhầm người gửi tin nhắn và gây ảnh hưởng đến uy tín của Huy.", ans: true, explanation: "Sự việc sẽ làm ảnh hưởng danh dự của Huy nếu bạn bè bị lừa mất tiền." },
+                { text: "d) Huy phải xác định được người tạo tài khoản giả mạo rồi mới có thể báo cáo tài khoản đó.", ans: false, explanation: "Huy không cần biết ai tạo, chỉ cần chứng minh bản thân là chủ thể thật sự để báo cáo cho hệ thống khóa tài khoản kia lại." }
+            ]},
+            { context: "Câu 3. Trong giờ sinh hoạt, Tuấn chụp một bức ảnh của Mai. Mai đề nghị Tuấn không đăng ảnh lên mạng. Sau đó, Tuấn định đăng ảnh vào nhóm lớp để các bạn chỉnh sửa thành hình hài hước. Hãy xác định mỗi nhận định sau là đúng hay sai:", subs: [
+                { text: "a) Tôn trọng sự riêng tư của người khác là một yêu cầu của văn hóa ứng xử trong môi trường số.", ans: true, explanation: "Hình ảnh cá nhân được pháp luật và các chuẩn mực đạo đức trên không gian mạng bảo vệ." },
+                { text: "b) Đăng ảnh vào nhóm kín thì không cần quan tâm đến sự đồng ý của người có trong ảnh.", ans: false, explanation: "Bất kì môi trường nào (nhóm kín hay công khai) đều không được sử dụng hình ảnh của người khác khi họ chưa đồng ý." },
+                { text: "c) Việc đăng ảnh trái với mong muốn của Mai có thể khiến Mai cảm thấy bị thiếu tôn trọng, dù ảnh chỉ được chia sẻ trong nhóm lớp.", ans: true, explanation: "Bức ảnh chế giễu sẽ gây tổn thương tâm lý cho Mai." },
+                { text: "d) Tuấn nên giữ ảnh riêng và chỉ chia sẻ nếu Mai đồng ý với mục đích sử dụng ảnh.", ans: true, explanation: "Chỉ được chia sẻ và sử dụng hình ảnh khi có sự đồng thuận từ người trong ảnh." }
+            ]}
+        ];
+
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0; 
+        let wrongAnswers = 0;
+        let currentQuestionAnsweredCount = 0; 
+        
+        let studentInfo = { name: "", class: "", attempts: 0 };
+        const bgClasses = ['bg-card-0', 'bg-card-1', 'bg-card-2'];
+
+        function shuffleArray(array) {
+            let arr = JSON.parse(JSON.stringify(array));
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Âm thanh "Ting!" vang và sáng (Sine wave)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime); // C6
+                    osc.frequency.exponentialRampToValueAtTime(1567.98, audioCtx.currentTime + 0.1); // G6
+                    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.02);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.5);
+                } else {
+                    // Âm thanh "Buzzer" trầm báo sai (Square wave)
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
+                    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log("Trình duyệt không hỗ trợ Web Audio API");
+            }
+        }
+
+        document.getElementById('studentName').addEventListener('input', function() {
+            const name = this.value.trim();
+            const attemptInfo = document.getElementById('login-attempt-info');
+            if (name) {
+                const key = `tin10_attempts_b9b11_dark_${name.toLowerCase()}`;
+                const attempts = parseInt(localStorage.getItem(key) || 0);
+                attemptInfo.innerText = attempts > 0 ? `Số lượt đã làm bài trước đây: ${attempts} lượt.` : `Chào mừng bạn lần đầu làm bài!`;
+            } else {
+                attemptInfo.innerText = '';
+            }
+        });
+
+        function startQuiz() {
+            const name = document.getElementById('studentName').value.trim();
+            const cls = document.getElementById('studentClass').value.trim();
+
+            if (!name || !cls) {
+                document.getElementById('login-error').classList.remove('hidden');
+                return;
+            }
+            
+            const key = `tin10_attempts_b9b11_dark_${name.toLowerCase()}`;
+            let attempts = parseInt(localStorage.getItem(key) || 0) + 1;
+            localStorage.setItem(key, attempts);
+
+            studentInfo = { name, class: cls, attempts };
+            document.getElementById('stat-attempt').innerText = attempts;
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            wrongAnswers = 0;
+            
+            let selectedMCQs, selectedTFs;
+
+            if (attempts === 1) {
+                selectedMCQs = JSON.parse(JSON.stringify(rawMCQs)); 
+                selectedTFs = JSON.parse(JSON.stringify(rawTFs));
+
+                selectedMCQs.forEach(q => {
+                    q.type = 'mcq';
+                    q.shuffledOptions = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.answer }));
+                });
+            } else {
+                selectedMCQs = shuffleArray(rawMCQs);
+                selectedTFs = shuffleArray(rawTFs);
+
+                selectedMCQs.forEach(q => {
+                    q.type = 'mcq';
+                    let opts = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.answer }));
+                    q.shuffledOptions = shuffleArray(opts);
+                });
+            }
+
+            selectedTFs.forEach(q => { q.type = 'tf'; });
+            questions = [...selectedMCQs, ...selectedTFs];
+            
+            updateStats();
+            showQuestion();
+        }
+
+        function updateStats() {
+            document.getElementById('stat-completed').innerText = `${currentQuestionIndex}/${questions.length}`;
+            document.getElementById('stat-correct').innerText = correctAnswers;
+            document.getElementById('stat-wrong').innerText = wrongAnswers;
+        }
+
+        function showQuestion() {
+            currentQuestionAnsweredCount = 0;
+            document.getElementById('next-btn').disabled = true;
+
+            const q = questions[currentQuestionIndex];
+            const qCard = document.getElementById('question-card');
+            
+            qCard.className = `flex-grow p-4 md:p-8 rounded-2xl shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)] mb-4 md:mb-5 overflow-y-auto border border-white/5 transition-colors duration-700 ${bgClasses[currentQuestionIndex % bgClasses.length]}`;
+
+            const sectionTitle = document.getElementById('section-title');
+            const optionsContainer = document.getElementById('options-container');
+            const tfContainer = document.getElementById('tf-container');
+            const mcqExp = document.getElementById('mcq-explanation');
+            
+            if (mcqExp) mcqExp.classList.add('hidden');
+            
+            if (q.type === 'mcq') {
+                sectionTitle.innerText = `Phần I: Trắc nghiệm nhiều lựa chọn (${currentQuestionIndex + 1}/20)`;
+                document.getElementById('question-text').innerText = `Câu ${currentQuestionIndex + 1}: ${q.question}`;
+                
+                optionsContainer.innerHTML = '';
+                optionsContainer.classList.remove('hidden');
+                tfContainer.classList.add('hidden');
+
+                q.shuffledOptions.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn w-full text-left p-3 md:p-4 rounded-xl text-sm md:text-base break-words';
+                    btn.innerHTML = `<span class="font-extrabold mr-2 text-amber-500">${String.fromCharCode(65 + index)}.</span> ${opt.text}`;
+                    btn.onclick = () => selectAnswerMCQ(btn, opt.isCorrect, q.shuffledOptions, q.explanation);
+                    optionsContainer.appendChild(btn);
+                });
+            } else {
+                let tfIndex = currentQuestionIndex - 20 + 1;
+                sectionTitle.innerText = `Phần II: Trắc nghiệm Đúng/Sai (${tfIndex}/6)`;
+                document.getElementById('question-text').innerText = `Câu ${tfIndex}: ${q.context}`;
+                
+                tfContainer.innerHTML = '';
+                tfContainer.classList.remove('hidden');
+                optionsContainer.classList.add('hidden');
+
+                q.subs.forEach((sub, subIdx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flex flex-col gap-2 mb-2';
+
+                    const row = document.createElement('div');
+                    row.className = 'bg-slate-900/50 p-3 md:p-4 rounded-xl shadow-inner border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4';
+                    
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'text-xs md:text-base text-slate-200 font-medium flex-1';
+                    textDiv.innerText = sub.text;
+
+                    const btnGroup = document.createElement('div');
+                    btnGroup.className = 'flex gap-2 w-full md:w-auto mt-2 md:mt-0';
+
+                    const btnTrue = document.createElement('button');
+                    btnTrue.className = 'tf-btn flex-1 md:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-lg font-bold shadow-sm text-sm md:text-base';
+                    btnTrue.innerText = 'Đúng';
+                    
+                    const btnFalse = document.createElement('button');
+                    btnFalse.className = 'tf-btn flex-1 md:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-lg font-bold shadow-sm text-sm md:text-base';
+                    btnFalse.innerText = 'Sai';
+
+                    const expDiv = document.createElement('div');
+                    expDiv.className = 'w-full text-xs md:text-sm text-amber-200 bg-amber-900/30 p-2 md:p-3 rounded-lg border border-amber-500/30 hidden font-medium mt-1 leading-relaxed';
+                    expDiv.innerHTML = `<b>Giải thích:</b> ${sub.explanation}`;
+
+                    btnTrue.onclick = () => selectAnswerTF(btnTrue, btnFalse, true, sub.ans, expDiv);
+                    btnFalse.onclick = () => selectAnswerTF(btnFalse, btnTrue, false, sub.ans, expDiv);
+
+                    btnGroup.appendChild(btnTrue);
+                    btnGroup.appendChild(btnFalse);
+                    
+                    row.appendChild(textDiv);
+                    row.appendChild(btnGroup);
+
+                    wrapper.appendChild(row);
+                    wrapper.appendChild(expDiv);
+                    tfContainer.appendChild(wrapper);
+                });
+            }
+        }
+
+        function selectAnswerMCQ(selectedBtn, isCorrect, allOptions, explanationText) {
+            if (currentQuestionAnsweredCount > 0) return;
+            currentQuestionAnsweredCount = 1;
+
+            const buttons = document.getElementById('options-container').children;
+
+            if (isCorrect) {
+                selectedBtn.classList.add('option-correct');
+                correctAnswers++;
+                playSound('correct');
+            } else {
+                selectedBtn.classList.add('option-wrong');
+                wrongAnswers++;
+                playSound('wrong');
+                
+                for (let i = 0; i < buttons.length; i++) {
+                    if (allOptions[i].isCorrect) {
+                        buttons[i].classList.add('option-correct');
+                        buttons[i].classList.remove('border-white/10');
+                    }
+                }
+
+                const mcqExp = document.getElementById('mcq-explanation');
+                if (mcqExp && explanationText) {
+                    mcqExp.innerHTML = `<b>Giải thích:</b> ${explanationText}`;
+                    mcqExp.classList.remove('hidden');
+                }
+            }
+
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if(buttons[i] !== selectedBtn && !allOptions[i].isCorrect) {
+                    buttons[i].style.opacity = '0.3';
+                }
+            }
+
+            updateStats();
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function selectAnswerTF(selectedBtn, unselectedBtn, userChoice, correctChoice, expDiv) {
+            selectedBtn.disabled = true;
+            unselectedBtn.disabled = true;
+            unselectedBtn.style.opacity = '0.3';
+
+            if (userChoice === correctChoice) {
+                selectedBtn.classList.add('option-correct');
+                selectedBtn.classList.remove('border-white/15', 'text-cbd5e1');
+                correctAnswers++;
+                playSound('correct');
+            } else {
+                selectedBtn.classList.add('option-wrong');
+                selectedBtn.classList.remove('border-white/15', 'text-cbd5e1');
+                wrongAnswers++;
+                playSound('wrong');
+                
+                unselectedBtn.style.opacity = '1';
+                unselectedBtn.classList.add('bg-emerald-900/40', 'border-emerald-500', 'text-emerald-400');
+
+                if(expDiv) expDiv.classList.remove('hidden');
+            }
+
+            currentQuestionAnsweredCount++;
+            updateStats();
+
+            if (currentQuestionAnsweredCount === 4) {
+                document.getElementById('next-btn').disabled = false;
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            updateStats();
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            document.getElementById('student-info-display').innerText = `Học sinh: ${studentInfo.name} - Lớp: ${studentInfo.class}`;
+            // Tổng: 20 MCQs + (6 T/F * 4) = 44 ý
+            document.getElementById('final-score-text').innerText = `${correctAnswers}/44`;
+            
+            const msgEl = document.getElementById('feedback-message');
+            const percent = correctAnswers / 44;
+            
+            if (percent === 1) {
+                msgEl.innerText = "Tuyệt vời! Bạn đã hoàn thành xuất sắc 100%!";
+                msgEl.className = "text-xl md:text-2xl font-black mb-4 md:mb-6 text-emerald-400 drop-shadow-md";
+            } else if (percent >= 0.75) {
+                msgEl.innerText = "Rất tốt! Bạn nắm vững hầu hết kiến thức.";
+                msgEl.className = "text-lg md:text-xl font-bold mb-4 md:mb-6 text-cyan-400 drop-shadow-sm";
+            } else if (percent >= 0.5) {
+                msgEl.innerText = "Đạt mức Khá. Hãy xem lại những phần làm sai để rút kinh nghiệm nhé!";
+                msgEl.className = "text-lg md:text-xl font-bold mb-4 md:mb-6 text-amber-400 drop-shadow-sm";
+            } else {
+                msgEl.innerText = "Cần cố gắng nhiều hơn! Hãy ôn tập kĩ lại bài giảng trên lớp.";
+                msgEl.className = "text-lg md:text-xl font-bold mb-4 md:mb-6 text-rose-400 drop-shadow-sm";
+            }
+
+            document.getElementById('final-attempt-counter').innerText = `Lượt làm bài hiện tại: ${studentInfo.attempts}`;
+
+            sendDataToSheet();
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        function sendDataToSheet() {
+            if (!GOOGLE_WEB_APP_URL || !GOOGLE_WEB_APP_URL.startsWith("http")) return;
+
+            const data = {
+                name: studentInfo.name,
+                class: studentInfo.class,
+                score: correctAnswers,
+                total: 44,
+                attempts: studentInfo.attempts
+            };
+
+            fetch(GOOGLE_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => console.log("Đã gửi dữ liệu lên Google Sheets."))
+              .catch(error => console.error('Lỗi khi gửi dữ liệu:', error));
+        }
+    </script>
+</body>
+</html>
